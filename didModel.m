@@ -22,6 +22,11 @@ s.did.rt = 0.200;   % Recomputation interval [s]
 s.did.pt = 0.005;   % Prediction horizon [s]
 s.did.alpha = 1e-7; % Ridge regression coefficient [s]
 
+% Set the updating method from the following list: @did.smWeighted,
+% @did.smWindowed, @did.chWeighted, @did.chWindowed, @did.qrWeighted,
+% @did.wWindowed.
+s.did.update = @did.smWeighted;
+
 %% Load and prepare data
 % Load given dataset from a file
 data = load(fullfile("data/", sprintf("%s.mat", s.data.name)));
@@ -62,7 +67,7 @@ tData = smoothForces(tData, 50);
 % generality of the results. CAUTION must be taken when interpreting the
 % results, as the state sent to the DID controller would differ due to
 % the controller's previous actions during the real-life work.
-[D, wEff] = did.smWeighted(s, tData);
+[D, wEff] = s.did.update(s, tData);
 [e, t, ids] = did.predict(s, tData, D, wEff);
 
 %% Utility functions

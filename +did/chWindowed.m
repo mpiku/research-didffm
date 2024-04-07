@@ -1,5 +1,5 @@
-function [D, wEff] = smWeighted(s, tData)
-%SMWEIGHTED Weighted DID based on Sherman-Morrison updating
+function [D, wEff] = chWindowed(s, tData)
+%CHWINDOWED Windowed DID based on Cholesky decomposition
 %   Input:
 %      - s - Settings structure
 %      - tData - Training data
@@ -15,7 +15,7 @@ function [D, wEff] = smWeighted(s, tData)
 %   *Corresponding author e-mail: maciej.pikulinski.dokt@pw.edu.pl
 
 % Transform time-based settings into sample-based
-wEff = floor(log(s.did.rth) / log(s.did.rho));
+wEff = s.did.wt / s.data.Ts;
 r    = s.did.rt / s.data.Ts;
 
 % Internals uses sigma among rho
@@ -42,11 +42,14 @@ end
 ridgeReg = s.did.alpha * eye(size(Zw, 1));
 
 % Initialize model and updating matrices
-P = pinv(Zw * Zw' + ridgeReg);
-D(:, :, 1) = Ew * Zw' * P; P = P / s.did.rho;
+R = chol((Zw * Zw' + ridgeReg)); EZw = Ew * Zw';
+D(:, :, 1) = (R \ (R' \ EZw'))';
+R = R * sigma;
 
 % Compoute models by updating
 for i = 2:(size(E, 2) + 1)
+    zOld  = Zw(:, 1);
+    eOld  = Ew(:, 1);
     zNext = Z(:, i - 1);
     eNext = E(:, i - 1);
     
@@ -56,22 +59,22 @@ for i = 2:(size(E, 2) + 1)
 
     % Recomputation
     if rem(i - 1, r) == 0
-        P = pinv(Zw * Zw' + ridgeReg);
-        D(:, :, i) = Ew * Zw' * P; P = P / s.did.rho;
+        R = chol((Zw * Zw' + ridgeReg)); EZw = Ew * Zw';
+        D(:, :, i) = (R \ (R' \ EZw'))';
+        R = R * sigma;
         continue;
     end
 
-    model = D(:, :, i - 1);
-
     % Add (update) the latest measurement
-    update.Pz = P * zNext;
-    update.gamma = 1 / (1 + zNext' * update.Pz);
-
-    model = model + ...
-        update.gamma * (eNext - model * zNext) * update.Pz';
-
-    P = (P - update.gamma * (update.Pz * update.Pz'));
-    P = (P + P') / 2;
+    R = cholupdate(R, zNext);
+    EZw = EZw * s.did.rho + eNext * zNext';
+    
+    % Remove (downdate) the oldest measurement
+    R = cholupdate(R, zOld * sigma, '-');
+    EZw = EZw - eOld * zOld' * s.did.rho;
+    model = (R \ (R' \ EZw'))';
+    
+    R = R * sigma;
 
     D(:, :, i) = model;
 end

@@ -1,5 +1,5 @@
-function [D, wEff] = smWeighted(s, tData)
-%SMWEIGHTED Weighted DID based on Sherman-Morrison updating
+function [D, wEff] = qrWeighted(s, tData)
+%QRWEIGHTED Weighted DID based on QR decomposition
 %   Input:
 %      - s - Settings structure
 %      - tData - Training data
@@ -42,8 +42,9 @@ end
 ridgeReg = s.did.alpha * eye(size(Zw, 1));
 
 % Initialize model and updating matrices
-P = pinv(Zw * Zw' + ridgeReg);
-D(:, :, 1) = Ew * Zw' * P; P = P / s.did.rho;
+[Q, R, P] = qr((Zw * Zw' + ridgeReg)); EZw = Ew * Zw';
+D(:, :, 1) = (R' \ (EZw * P)')' * Q';
+Q = Q; R = R * s.did.rho;
 
 % Compoute models by updating
 for i = 2:(size(E, 2) + 1)
@@ -56,22 +57,18 @@ for i = 2:(size(E, 2) + 1)
 
     % Recomputation
     if rem(i - 1, r) == 0
-        P = pinv(Zw * Zw' + ridgeReg);
-        D(:, :, i) = Ew * Zw' * P; P = P / s.did.rho;
+        [Q, R, P] = qr((Zw * Zw' + ridgeReg)); EZw = Ew * Zw';
+        D(:, :, i) = (R' \ (EZw * P)')' * Q';
+        Q = Q; R = R * s.did.rho;
         continue;
     end
 
-    model = D(:, :, i - 1);
-
     % Add (update) the latest measurement
-    update.Pz = P * zNext;
-    update.gamma = 1 / (1 + zNext' * update.Pz);
+    [Q, R] = qrupdate(Q, R, zNext, (zNext' * P)');
+    EZw = EZw * s.did.rho + eNext * zNext';
+    model = (R' \ (EZw * P)')' * Q';  
 
-    model = model + ...
-        update.gamma * (eNext - model * zNext) * update.Pz';
-
-    P = (P - update.gamma * (update.Pz * update.Pz'));
-    P = (P + P') / 2;
+    Q = Q; R = R * s.did.rho;
 
     D(:, :, i) = model;
 end

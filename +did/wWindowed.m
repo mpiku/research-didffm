@@ -1,5 +1,5 @@
-function [D, wEff] = smWeighted(s, tData)
-%SMWEIGHTED Weighted DID based on Sherman-Morrison updating
+function [D, wEff] = wWindowed(s, tData)
+%WWINDOWED Windowed DID based on Woodbury formula
 %   Input:
 %      - s - Settings structure
 %      - tData - Training data
@@ -15,7 +15,7 @@ function [D, wEff] = smWeighted(s, tData)
 %   *Corresponding author e-mail: maciej.pikulinski.dokt@pw.edu.pl
 
 % Transform time-based settings into sample-based
-wEff = floor(log(s.did.rth) / log(s.did.rho));
+wEff = s.did.wt / s.data.Ts;
 r    = s.did.rt / s.data.Ts;
 
 % Internals uses sigma among rho
@@ -44,9 +44,12 @@ ridgeReg = s.did.alpha * eye(size(Zw, 1));
 % Initialize model and updating matrices
 P = pinv(Zw * Zw' + ridgeReg);
 D(:, :, 1) = Ew * Zw' * P; P = P / s.did.rho;
+CInv = [-1 0; 0 1];
 
 % Compoute models by updating
 for i = 2:(size(E, 2) + 1)
+    zOld  = Zw(:, 1);
+    eOld  = Ew(:, 1);
     zNext = Z(:, i - 1);
     eNext = E(:, i - 1);
     
@@ -63,14 +66,17 @@ for i = 2:(size(E, 2) + 1)
 
     model = D(:, :, i - 1);
 
-    % Add (update) the latest measurement
-    update.Pz = P * zNext;
-    update.gamma = 1 / (1 + zNext' * update.Pz);
+    U = [zOld * sigma zNext];
+    V = [eOld * sigma eNext];
+
+    PkU = P * U;
+
+    gamma = inv(CInv + U'*(PkU));
 
     model = model + ...
-        update.gamma * (eNext - model * zNext) * update.Pz';
+        (V - model * U) * (gamma) * (PkU');
 
-    P = (P - update.gamma * (update.Pz * update.Pz'));
+    P = (P - PkU * (gamma) * (PkU')) / s.did.rho;
     P = (P + P') / 2;
 
     D(:, :, i) = model;
