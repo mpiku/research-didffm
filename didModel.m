@@ -49,7 +49,6 @@ data = load(fullfile("data/", sprintf("%s.mat", s.data.name)));
 % controllers also taken for the measured state (indirect approach).
 tData.input.q   = data.x(1:2, :);
 tData.input.dq  = data.x(3:4, :);
-tData.input.ddq = data.x(5:6, :);
 tData.target = data.f.fb - (data.f.nn.lnn.x + data.f.nn.fnn.x);
 
 %% Preprocess data
@@ -69,7 +68,7 @@ tData = downsampleData(tData, 1000 * s.data.Ts);
 
 %% Utility functions
 function dData = downsampleData(data, factor)
-    fn ={'q', 'dq', 'ddq'};
+    fn ={'q', 'dq'};
     for i = 1:numel(fn)
         dData.input.(fn{i}) = data.input.(fn{i})(:, 1:factor:end);
     end
