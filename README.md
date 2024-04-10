@@ -1,5 +1,5 @@
 ## Data-Driven Inverse Dynamics for Flexure Manipulator
-This repository stores datasets and scripts complementary to paper M. Pikulinski*, P. Malczyk, R. Aarts, (2024), _Data-Driven Inverse Dynamics Modeling Using Neural-Networks and Regression-Based Techniques_.
+This repository stores datasets and scripts complementary to paper M. Pikulinski*, P. Malczyk, R. Aarts, (2024), _Data-Driven Inverse Dynamics Modeling Using Neural-Networks and Regression-Based Techniques_, Multibody System Dynamics (under review).
 
 *Corresponding author e-mail: maciej.pikulinski.dokt@pw.edu.pl
 

@@ -3,9 +3,9 @@
 %   flexure manipulator.
 %   
 %   This code illustrates methods from M. Pikulinski*, P. Malczyk, R. Aarts,
-%   Data-Driven Inverse Dynamics Modeling Using Neural-Networks and
-%   Regression-Based Techniques, 2024. If you use it, please refer to the
-%   paper.
+%   (2024), Data-Driven Inverse Dynamics Modeling Using Neural-Networks and
+%   Regression-Based Techniques, Multibody System Dynamics (under review).
+%   If you use it, please refer to the paper.
 % 
 %   *Corresponding author e-mail: maciej.pikulinski.dokt@pw.edu.pl
 
