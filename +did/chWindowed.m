@@ -15,7 +15,7 @@ function [D, wEff] = chWindowed(s, tData)
 %   *Corresponding author e-mail: maciej.pikulinski.dokt@pw.edu.pl
 
 % Transform time-based settings into sample-based
-wEff = s.did.wt / s.data.Ts;
+wEff = floor(s.did.wt / s.data.Ts);
 r    = s.did.rt / s.data.Ts;
 
 % Internals uses sigma among rho
