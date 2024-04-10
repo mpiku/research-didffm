@@ -17,9 +17,9 @@ s.data.Ts = 0.005; % Operational sampling time [s]
 % DID settings
 s.did.rho = 0.650;  % Weighting factor rho [-]
 s.did.rth = 1e-3;   % Weighting factor rho threshold [-]
-s.did.wt = 0.100;   % Window time [s]
+s.did.wt = 0.150;   % Window time [s]
 s.did.rt = 0.200;   % Recomputation interval [s]
-s.did.pt = 0.005;   % Prediction horizon [s]
+s.did.pt = 0.025;   % Prediction horizon [s]
 s.did.alpha = 1e-7; % Ridge regression coefficient [s]
 
 % Set the updating method from the following list: @did.smWeighted,
@@ -56,9 +56,6 @@ tData.target = data.f.fb - (data.f.nn.lnn.x + data.f.nn.fnn.x);
 % Data is saved at 1000 Hz, downsample it to 1 / Ts (defaults 200 Hz)
 tData = downsampleData(tData, 1000 * s.data.Ts);
 
-% Data is a raw measurement, smooth forces
-tData = smoothForces(tData, 50);
-
 %% Train models and predict values
 % First, a sequence of updated models is generated as if done online,
 % retrieving a data stream. Then, predictions are computed from the
@@ -77,11 +74,4 @@ function dData = downsampleData(data, factor)
         dData.input.(fn{i}) = data.input.(fn{i})(:, 1:factor:end);
     end
     dData.target = data.target(:, 1:factor:end);
-end
-
-function sData = smoothForces(data, smPoints)
-    sData.input = data.input;
-    for i = 1:2
-        sData.target(i, :) = smooth(data.target(i, :), smPoints);
-    end
 end
