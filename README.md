@@ -1,7 +1,7 @@
 ## Data-Driven Inverse Dynamics for Flexure Manipulator
-This repository stores datasets and scripts complementary to paper M. Pikulinski*, P. Malczyk, R. Aarts, (2024), _Data-Driven Inverse Dynamics Modeling Using Neural-Networks and Regression-Based Techniques_, Multibody System Dynamics (under review).
+This repository stores datasets and scripts complementary to paper M. Pikulinski*, P. Malczyk, R. Aarts, _Data-driven inverse dynamics modeling using neural-networks and regression-based techniques_, Multibody Syst Dyn (2024), [doi:10/ngdb](https://doi.org/ngdb).
 
-*Corresponding author e-mail: maciej.pikulinski.dokt@pw.edu.pl
+*Corresponding author e-mail: maciej.pikulinski@pw.edu.pl
 
 ### Abstract
 This research proposes a novel approach for the residual modeling of inverse dynamics employed to control a real robotic device. Specifically, we use techniques based on linear regression for residual modeling while a nominal model is discovered by physics-informed neural networks such as the Lagrangian Neural Network and the Feedforward Neural Network. We introduce an efficient online learning mechanism of the residual models that utilizes rank-one updates based on the Sherman-Morrison formula. This enables faster adaptation and updates to effects not captured by the neural networks. While the time complexity of updating the model is comparable to other successful learning methods, the method excels in prediction complexity, which depends solely on the model dimension.
